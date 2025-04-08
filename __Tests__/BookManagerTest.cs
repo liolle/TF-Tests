@@ -21,13 +21,12 @@ public class BookManagerTest
 
   private readonly Book sample_book = new()
   {
-    Title = "", 
-          Author = "", 
-          ISBN = "", 
+    Title = "Clean Code", 
+          Author = "Robert C. Martin", 
+          ISBN = "9780132350884", 
           Year = 2008, 
-          Genre = "", 
+          Genre = "Programming", 
   };
-
 
   [Fact]
   public void AddBookExpectTrue()
@@ -48,6 +47,33 @@ public class BookManagerTest
 
     _mockBookService.Verify(s=>s.Add(sample_book),Times.Once());
     _mockLoggerService.Verify(r=>r.Log(It.Is<string>(msg=>msg.Contains("Dupplicate ISBN"))), Times.Exactly(1));
+  }
+
+
+  [Fact]
+  public void AddBookMissingTitleExpectException()
+  {
+    _mockBookService.Setup(s=>s.Add(sample_book)).Returns(()=>throw new Exception("Missing Title"));
+
+    bool result =_bookManager.AddBook(sample_book);
+
+    Assert.False(result);
+
+    _mockBookService.Verify(s=>s.Add(sample_book),Times.Once);
+    _mockLoggerService.Verify(r=>r.Log(It.Is<string>(msg=>msg.Contains("Missing Title"))), Times.Exactly(1));
+  }
+
+  [Fact]
+  public void AddBookMissingISBNExpectException()
+  {
+    _mockBookService.Setup(s=>s.Add(sample_book)).Returns(()=>throw new Exception("Missing ISBN"));
+
+    bool result =_bookManager.AddBook(sample_book);
+
+    Assert.False(result);
+
+    _mockBookService.Verify(s=>s.Add(sample_book),Times.Once);
+    _mockLoggerService.Verify(r=>r.Log(It.Is<string>(msg=>msg.Contains("Missing ISBN"))), Times.Exactly(1));
   }
 
 }
