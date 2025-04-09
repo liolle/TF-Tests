@@ -7,6 +7,9 @@ namespace bookmanager.services;
 public interface IBookManagerger
 {
   bool AddBook(Book book);
+  bool PatchBook(Book book);
+  bool AddBookCopies(string ISBN,int quantity);
+  bool DeleteBook(string bookId);
 
 }
 
@@ -26,7 +29,6 @@ public partial class BookManager : IBookManagerger
   public bool AddBook(Book book)
   {
     CheckBookField(book);
-
     // Propagating Unique key violation
     if(_bookService.GetByISBN(book.ISBN) is not null){throw new ISBNDuplicateException();}
 
@@ -34,6 +36,23 @@ public partial class BookManager : IBookManagerger
     return true;
   }
 
+  public bool AddBookCopies(string ISBN, int quantity)
+  {
+    _bookService.AddCopies(ISBN,quantity);
+    return true;
+  }
+
+    public bool DeleteBook(string bookId)
+    {
+      _bookService.Delete(bookId);
+      return true;
+    }
+
+    public bool PatchBook(Book book)
+  {
+    _bookService.Update(book);
+    return true;
+  }
 }
 
 // Helper methods

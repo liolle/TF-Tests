@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using __Tests__.faker;
 using bookmanager.exceptions;
 using bookmanager.models;
@@ -23,6 +24,7 @@ public class BookManagerTest
   }
 
   [Fact]
+  [Description("BK-01 : Ajout d'un livre avec toutes les informations valides")]
   public void AddBookWithValidData()
   {
     //Arrange
@@ -38,7 +40,8 @@ public class BookManagerTest
   }
 
   [Fact]
-  public void AddDuplicateBookExpectException()
+  [Description("BK-02 : Ajout d'un livre avec un ISBN déjà existant")]
+  public void AddDuplicateISBNkExpectException()
   {
     //Arrange
     string key = "valid-book"; 
@@ -55,6 +58,7 @@ public class BookManagerTest
 
 
   [Fact]
+  [Description("BK-03 : Ajout d'un livre avec des champs obligatoires manquants")]
   public void AddBookMissingTitle()
   {
     //Arrange
@@ -72,6 +76,7 @@ public class BookManagerTest
 
 
   [Fact]
+  [Description("BK-03 : Ajout d'un livre avec des champs obligatoires manquants")]
   public void AddBookMissingISBN()
   {
     //Arrange
@@ -88,6 +93,7 @@ public class BookManagerTest
   }
 
   [Fact]
+  [Description("BK-03 : Ajout d'un livre avec des champs obligatoires manquants")]
   public void AddBookMissingTitleAndISBN()
   {
     //Arrange
@@ -104,7 +110,8 @@ public class BookManagerTest
     _mockBookService.Verify(s=>s.GetByISBN(sample.ISBN),Times.Exactly(0));
   }
 
-    [Fact]
+  [Fact]
+  [Description("BK-04 : Ajout d'un livre avec un nombre de copies négatif")]
   public void AddBookInvalidCopies()
   {
     //Arrange
@@ -120,5 +127,93 @@ public class BookManagerTest
     _mockBookService.Verify(s=>s.GetByISBN(sample.ISBN),Times.Exactly(0));
   }
 
+  [Fact]
+  [Description("BK-05 : Mise à jour des informations d'un livre existant")]
+  public void UpdateValidBook()
+  {
+    //Arrange
+    string key = "valid-book"; 
+    Book sample = _faker[key]??throw new Exception($"Missing configurations: Book[{key}]");
+
+    //Act 
+    _bookManager.PatchBook(sample);
+
+    //Assert
+    _mockBookService.Verify(s=>s.Update(sample),Times.Exactly(1));
+    _mockBookService.Verify(s=>s.GetByISBN(sample.ISBN),Times.Exactly(0));
+  }
+
+  [Fact]
+  [Description("BK-06 : Mise à jour du nombre de copies")]
+  public void AddBookCopies()
+  {
+    //Arrange
+    string key = "valid-book"; 
+    Book sample = _faker[key]??throw new Exception($"Missing configurations: Book[{key}]");
+
+    //Act 
+    _bookManager.AddBookCopies(sample.ISBN,2);
+
+    //Assert
+    _mockBookService.Verify(s=>s.AddCopies(sample.ISBN,2),Times.Exactly(1));
+    _mockBookService.Verify(s=>s.GetByISBN(sample.ISBN),Times.Exactly(0));
+  }
+
+
+  [Fact]
+  [Description("BK-07 : Mise à jour d'un livre inexistant")]
+  public void AddBookCopiesUnknownBook()
+  {
+    //Arrange
+    string key = "missing-ISBN-book"; 
+    Book sample = _faker[key]??throw new Exception($"Missing configurations: Book[{key}]");
+
+    _mockBookService.Setup(s=>s.AddCopies(sample.ISBN,2)).Returns(()=>throw new BookNotFoundException());
+
+    //Act 
+    BookNotFoundException exception = Assert.Throws<BookNotFoundException>(() => _bookManager.AddBookCopies(sample.ISBN,2));
+
+    //Assert
+    _mockBookService.Verify(s=>s.AddCopies(sample.ISBN,2),Times.Exactly(1));
+  }
+
+  [Fact]
+  [Description("BK-08 : Suppression d'un livre existant sans emprunts actifs")]
+  public void DeleteBookWithoutLoan()
+  {
+
+    //Arrange
+    string key = "valid-book"; 
+    Book sample = _faker[key]??throw new Exception($"Missing configurations: Book[{key}]");
+
+    _mockBookService.Setup(s=>s.HasActiveLoan(sample.BookId)).Returns(false);
+
+    //Act 
+    bool result = _bookManager.DeleteBook(sample.BookId);
+
+
+    //Assert
+    Assert.True(result);
+    _mockBookService.Verify(s=>s.Delete(sample.BookId),Times.Exactly(1));
+  }
+
+  [Fact]
+  [Description("BK-09 : Tentative de suppression d'un livre actuellement emprunté")]
+  public void DeleteBookWithtLoan()
+  {
+
+    //Arrange
+    string key = "valid-book"; 
+    Book sample = _faker[key]??throw new Exception($"Missing configurations: Book[{key}]");
+
+    _mockBookService.Setup(s=>s.HasActiveLoan(sample.BookId)).Returns(true);
+    _mockBookService.Setup(s=>s.Delete(sample.BookId)).Returns(()=>throw new InvalidBookOperation());
+
+    //Act 
+    InvalidBookOperation exception = Assert.Throws<InvalidBookOperation>(() => _bookManager.DeleteBook(sample.BookId));
+
+    //Assert
+    _mockBookService.Verify(s=>s.Delete(sample.BookId),Times.Exactly(1));
+  }
 
 }

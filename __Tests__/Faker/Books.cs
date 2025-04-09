@@ -21,6 +21,20 @@ where T : Book
         }
     },
       {
+        "valid-book-2",
+        new Book()
+        {
+          BookId = "B-9780132350884-1",
+          Title = "Clean Codeer", 
+          Author = "Robert C. Bernard", 
+          ISBN = "9780132350884", 
+          Year = 2009, 
+          Genre = "Art", 
+          Copies = 15
+        }
+      },
+
+      {
         "missing-title-book",
         new Book()
         {

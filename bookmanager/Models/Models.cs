@@ -9,4 +9,20 @@ public class Book
   public int Year {get;set;}
   public string Genre {get;set;} = "";
   public int Copies {get;set;}
+
+  public Book(Book book)
+  {
+    BookId = book.BookId;
+    Title = book.Title;
+    Author = book.Author;
+    ISBN = book.ISBN;
+    Year = book.Year;
+    Genre = book.Genre;
+    Copies = book.Copies;
+  }
+
+  public Book()
+  {
+
+  }
 }

@@ -8,6 +8,21 @@ public class ISBNDuplicateException : Exception
   }
 }
 
+public class BookNotFoundException : Exception 
+{
+  public BookNotFoundException () : base($"Book not found")
+  {
+  }
+}
+
+public class InvalidBookOperation : Exception
+{
+  public InvalidBookOperation() : base()
+  {
+
+  }
+}
+
 public class EmptyFieldException : Exception
 { 
   public List<string> MissingFields { get; }
