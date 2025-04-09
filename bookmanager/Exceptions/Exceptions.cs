@@ -7,3 +7,14 @@ public class ISBNDuplicateException : Exception
   {
   }
 }
+
+public class EmptyFieldException : Exception
+{ 
+  public List<string> MissingFields { get; }
+
+  public EmptyFieldException(List<string> fields) 
+    : base($"Missing field{(fields.Count>0?"s":"")}: {string.Join(", ", fields)}")
+  {
+    MissingFields = fields ?? [];
+  }
+}

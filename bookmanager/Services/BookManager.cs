@@ -25,6 +25,13 @@ public class BookManager : IBookManagerger
 
   public bool AddBook(Book book)
   {
+    // check mandatory fiels 
+    List<string> missing_fields = [];
+    if(String.IsNullOrEmpty(book.Title)){missing_fields.Add("Title");}
+    if(String.IsNullOrEmpty(book.ISBN)){missing_fields.Add("ISBN");}
+
+    if (missing_fields.Count>0){throw new EmptyFieldException(missing_fields);}
+
     // Propagating Unique key violation
     if(_bookService.GetByISBN(book.ISBN) is not null){throw new ISBNDuplicateException();}
 

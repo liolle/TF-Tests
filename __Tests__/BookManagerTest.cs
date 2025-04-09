@@ -52,4 +52,57 @@ public class BookManagerTest
     _mockBookService.Verify(s=>s.Add(sample),Times.Exactly(0));
     _mockBookService.Verify(s=>s.GetByISBN(sample.ISBN),Times.Exactly(1));
   }
+
+
+  [Fact]
+  public void AddBookMissingTitle()
+  {
+    //Arrange
+    string key = "missing-title-book"; 
+    Book sample = _faker[key]??throw new Exception($"Missing configurations: Book[{key}]");
+
+    //Act 
+    EmptyFieldException exception = Assert.Throws<EmptyFieldException>(() => _bookManager.AddBook(sample));
+
+    //Assert
+    Assert.Contains("Title", exception.MissingFields);
+    _mockBookService.Verify(s=>s.Add(sample),Times.Exactly(0));
+    _mockBookService.Verify(s=>s.GetByISBN(sample.ISBN),Times.Exactly(0));
+  }
+
+
+  [Fact]
+  public void AddBookMissingISBN()
+  {
+    //Arrange
+    string key = "missing-ISBN-book"; 
+    Book sample = _faker[key]??throw new Exception($"Missing configurations: Book[{key}]");
+
+    //Act 
+    EmptyFieldException exception = Assert.Throws<EmptyFieldException>(() => _bookManager.AddBook(sample));
+
+    //Assert
+    Assert.Contains("ISBN", exception.MissingFields);
+    _mockBookService.Verify(s=>s.Add(sample),Times.Exactly(0));
+    _mockBookService.Verify(s=>s.GetByISBN(sample.ISBN),Times.Exactly(0));
+  }
+
+  [Fact]
+  public void AddBookMissingTitleAndISBN()
+  {
+    //Arrange
+    string key = "missing-title-ISBN-book"; 
+    Book sample = _faker[key]??throw new Exception($"Missing configurations: Book[{key}]");
+
+    //Act 
+    EmptyFieldException exception = Assert.Throws<EmptyFieldException>(() => _bookManager.AddBook(sample));
+
+    //Assert
+    Assert.Contains("ISBN", exception.MissingFields);
+    Assert.Contains("Title", exception.MissingFields);
+    _mockBookService.Verify(s=>s.Add(sample),Times.Exactly(0));
+    _mockBookService.Verify(s=>s.GetByISBN(sample.ISBN),Times.Exactly(0));
+  }
+
+
 }
