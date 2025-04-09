@@ -26,7 +26,7 @@ public class BookManager : IBookManagerger
   public bool AddBook(Book book)
   {
     // Propagating Unique key violation
-    if(_bookService.GetById(book.BookId) is not null){throw new ISBNDuplicateException();}
+    if(_bookService.GetByISBN(book.ISBN) is not null){throw new ISBNDuplicateException();}
 
     _bookService.Add(book);
     return true;

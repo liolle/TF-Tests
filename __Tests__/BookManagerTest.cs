@@ -44,12 +44,12 @@ public class BookManagerTest
     string key = "valid-book"; 
     Book sample = _faker[key]??throw new Exception($"Missing configurations: Book[{key}]");
 
-    _mockBookService.Setup(s=>s.GetById(sample.BookId))
+    _mockBookService.Setup(s=>s.GetByISBN(sample.ISBN))
       .Returns(()=>throw new ISBNDuplicateException());
 
     //Act && Assert
     Assert.Throws<ISBNDuplicateException>(() => _bookManager.AddBook(sample));
     _mockBookService.Verify(s=>s.Add(sample),Times.Exactly(0));
-    _mockBookService.Verify(s=>s.GetById(sample.BookId),Times.Exactly(1));
+    _mockBookService.Verify(s=>s.GetByISBN(sample.ISBN),Times.Exactly(1));
   }
 }

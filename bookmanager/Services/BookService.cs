@@ -5,7 +5,7 @@ namespace bookmanager.services;
 public interface IBookService
 {
   bool Add(Book book);
-  Book GetById(string bookId);
+  Book GetByISBN(string ISBN);
 
 }
 
@@ -16,7 +16,7 @@ public class BooService : IBookService
         throw new NotImplementedException();
     }
 
-    public Book GetById(string bookId)
+    public Book GetByISBN(string ISBN)
     {
         throw new NotImplementedException();
     }
