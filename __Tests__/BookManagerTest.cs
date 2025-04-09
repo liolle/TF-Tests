@@ -1,3 +1,5 @@
+using __Tests__.faker;
+using bookmanager.exceptions;
 using bookmanager.models;
 using bookmanager.services;
 using Moq;
@@ -11,6 +13,7 @@ public class BookManagerTest
   private readonly Mock<ILogger> _mockLoggerService;
   private readonly BookManager _bookManager;
 
+  private Faker<Book> _faker = new();
   public BookManagerTest ()
   {
     _mockBookService = new();
@@ -19,61 +22,34 @@ public class BookManagerTest
     _bookManager = new (_mockBookService.Object,_mockUserService.Object,_mockLoggerService.Object);
   }
 
-  private readonly Book sample_book = new()
-  {
-    Title = "Clean Code", 
-          Author = "Robert C. Martin", 
-          ISBN = "9780132350884", 
-          Year = 2008, 
-          Genre = "Programming", 
-  };
-
   [Fact]
-  public void AddBookExpectTrue()
+  public void AddBookWithValidData()
   {
-    _bookManager.AddBook(sample_book);
+    //Arrange
+    string key = "valid-book"; 
+    Book sample = _faker[key]??throw new Exception($"Missing configurations: Book[{key}]");
 
-    _mockBookService.Verify(s=>s.Add(sample_book),Times.Once);
+    //Act
+    bool result = _bookManager.AddBook(sample);
+
+    //Assert
+    Assert.True(result);
+    _mockBookService.Verify(s=>s.Add(sample),Times.Once);
   }
 
   [Fact]
   public void AddDuplicateBookExpectException()
   {
-    _mockBookService.Setup(s=>s.Add(sample_book)).Returns(()=>throw new Exception("Dupplicate ISBN"));
+    //Arrange
+    string key = "valid-book"; 
+    Book sample = _faker[key]??throw new Exception($"Missing configurations: Book[{key}]");
 
-    bool result =_bookManager.AddBook(sample_book);
+    _mockBookService.Setup(s=>s.GetById(sample.BookId))
+      .Returns(()=>throw new ISBNDuplicateException());
 
-    Assert.False(result);
-
-    _mockBookService.Verify(s=>s.Add(sample_book),Times.Once());
-    _mockLoggerService.Verify(r=>r.Log(It.Is<string>(msg=>msg.Contains("Dupplicate ISBN"))), Times.Exactly(1));
+    //Act && Assert
+    Assert.Throws<ISBNDuplicateException>(() => _bookManager.AddBook(sample));
+    _mockBookService.Verify(s=>s.Add(sample),Times.Exactly(0));
+    _mockBookService.Verify(s=>s.GetById(sample.BookId),Times.Exactly(1));
   }
-
-
-  [Fact]
-  public void AddBookMissingTitleExpectException()
-  {
-    _mockBookService.Setup(s=>s.Add(sample_book)).Returns(()=>throw new Exception("Missing Title"));
-
-    bool result =_bookManager.AddBook(sample_book);
-
-    Assert.False(result);
-
-    _mockBookService.Verify(s=>s.Add(sample_book),Times.Once);
-    _mockLoggerService.Verify(r=>r.Log(It.Is<string>(msg=>msg.Contains("Missing Title"))), Times.Exactly(1));
-  }
-
-  [Fact]
-  public void AddBookMissingISBNExpectException()
-  {
-    _mockBookService.Setup(s=>s.Add(sample_book)).Returns(()=>throw new Exception("Missing ISBN"));
-
-    bool result =_bookManager.AddBook(sample_book);
-
-    Assert.False(result);
-
-    _mockBookService.Verify(s=>s.Add(sample_book),Times.Once);
-    _mockLoggerService.Verify(r=>r.Log(It.Is<string>(msg=>msg.Contains("Missing ISBN"))), Times.Exactly(1));
-  }
-
 }

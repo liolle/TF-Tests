@@ -1,3 +1,4 @@
+using bookmanager.exceptions;
 using bookmanager.models;
 
 namespace bookmanager.services; 
@@ -24,14 +25,10 @@ public class BookManager : IBookManagerger
 
   public bool AddBook(Book book)
   {
-    try
-    {
-      return _bookService.Add(book);
-    }
-    catch (Exception e)
-    {
-      _logger.Log(e.Message);
-      return false;
-    }
+    // Propagating Unique key violation
+    if(_bookService.GetById(book.BookId) is not null){throw new ISBNDuplicateException();}
+
+    _bookService.Add(book);
+    return true;
   }
 }
