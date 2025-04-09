@@ -54,6 +54,19 @@ where T : Book
           Genre = "Programming", 
           Copies = 3
         }
+      },
+      {
+        "invalid-copies-book",
+        new Book()
+        {
+          BookId = "B-9780132350884-1",
+          Title = "Clean Code", 
+          Author = "Robert C. Martin", 
+          ISBN = "9780132350884", 
+          Year = 2008, 
+          Genre = "Programming", 
+          Copies = -1
+        }
       }
   };
 

@@ -18,3 +18,15 @@ public class EmptyFieldException : Exception
     MissingFields = fields ?? [];
   }
 }
+
+public class InvalidFieldException : Exception
+{ 
+  public List<string> InvalidFields { get; }
+
+  public InvalidFieldException(List<string> fields) 
+    : base($"Invalid value for field{(fields.Count>0?"s":"")}: {string.Join(", ", fields)}")
+  {
+    InvalidFields = fields ?? [];
+  }
+}
+

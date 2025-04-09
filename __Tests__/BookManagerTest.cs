@@ -104,5 +104,21 @@ public class BookManagerTest
     _mockBookService.Verify(s=>s.GetByISBN(sample.ISBN),Times.Exactly(0));
   }
 
+    [Fact]
+  public void AddBookInvalidCopies()
+  {
+    //Arrange
+    string key = "invalid-copies-book"; 
+    Book sample = _faker[key]??throw new Exception($"Missing configurations: Book[{key}]");
+
+    //Act 
+    InvalidFieldException exception = Assert.Throws<InvalidFieldException>(() => _bookManager.AddBook(sample));
+
+    //Assert
+    Assert.Contains("Copies", exception.InvalidFields);
+    _mockBookService.Verify(s=>s.Add(sample),Times.Exactly(0));
+    _mockBookService.Verify(s=>s.GetByISBN(sample.ISBN),Times.Exactly(0));
+  }
+
 
 }

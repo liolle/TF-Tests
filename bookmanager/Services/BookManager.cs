@@ -10,7 +10,7 @@ public interface IBookManagerger
 
 }
 
-public class BookManager : IBookManagerger 
+public partial class BookManager : IBookManagerger 
 {
   private readonly IBookService _bookService;
   private readonly IUserService _userService;
@@ -25,12 +25,7 @@ public class BookManager : IBookManagerger
 
   public bool AddBook(Book book)
   {
-    // check mandatory fiels 
-    List<string> missing_fields = [];
-    if(String.IsNullOrEmpty(book.Title)){missing_fields.Add("Title");}
-    if(String.IsNullOrEmpty(book.ISBN)){missing_fields.Add("ISBN");}
-
-    if (missing_fields.Count>0){throw new EmptyFieldException(missing_fields);}
+    CheckBookField(book);
 
     // Propagating Unique key violation
     if(_bookService.GetByISBN(book.ISBN) is not null){throw new ISBNDuplicateException();}
@@ -38,4 +33,26 @@ public class BookManager : IBookManagerger
     _bookService.Add(book);
     return true;
   }
+
+}
+
+// Helper methods
+public partial class BookManager
+{
+  private void CheckBookField(Book book)
+  {
+    // check mandatory fiels 
+    List<string> missing_fields = [];
+    if(String.IsNullOrEmpty(book.Title)){missing_fields.Add("Title");}
+    if(String.IsNullOrEmpty(book.ISBN)){missing_fields.Add("ISBN");}
+
+    if (missing_fields.Count>0){throw new EmptyFieldException(missing_fields);}
+
+    // check invalid fiels
+    List<string> invalid_fields = [];
+    if(book.Copies<=0){invalid_fields.Add("Copies");}
+
+    if (invalid_fields.Count>0){throw new InvalidFieldException(invalid_fields);}
+  }
+
 }
